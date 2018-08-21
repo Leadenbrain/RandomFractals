@@ -2,17 +2,13 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import colors
 from random import randint
-#%matplotlib inline
-
-
 import pyopencl as cl
 
+# Set default context as GPU, code is meant to be run on GPU but CPU will work totally fine
 platform = cl.get_platforms()
 my_gpu_devices = platform[0].get_devices(device_type=cl.device_type.GPU)
 ctx = cl.Context(devices=my_gpu_devices)
-
-
-
+#ctx = cl.create_some_context(interactive=True)     #uncomment this for interactive context
 
 def mandelbrot_gpu(q, maxiter,d1,d2,eqn_list):
 
@@ -20,14 +16,15 @@ def mandelbrot_gpu(q, maxiter,d1,d2,eqn_list):
     horizon=2.0**15
     log_horizon=np.log(np.log(horizon))/np.log(2)
     queue = cl.CommandQueue(ctx)
-    
+    num_eqn = len(eqn_list)
     output = np.empty(q.shape, dtype=np.uint16)
 
     prg = cl.Program(ctx, """#include <pyopencl-complex.h>
     #pragma OPENCL EXTENSION cl_khr_byte_addressable_store : enable
     __kernel void mandelbrot(__global float2 *q,
                      __global ushort *output, ushort const maxiter,
-                     ushort d1, ushort d2, double horizon, double log_horizon, __global ushort *eqn_list)
+                     ushort d1, ushort d2, double horizon, double log_horizon, __global ushort *eqn_list,
+		     ushort num_eqn)
     {
         int gid = get_global_id(0);
         float real = q[gid].x;
@@ -48,7 +45,7 @@ def mandelbrot_gpu(q, maxiter,d1,d2,eqn_list):
             }
 
 
-            for (int i=0; i < 5; i++){
+            for (int i=0; i < num_eqn; i++){
 				if (eqn_list[i] == 0){
 					z = cfloat_powr(z,d1);
 					z.real = z.real + q[gid].x;
@@ -95,7 +92,7 @@ def mandelbrot_gpu(q, maxiter,d1,d2,eqn_list):
 
     prg.mandelbrot(queue, output.shape, None, q_opencl,
                    output_opencl, np.uint16(maxiter), np.uint16(d1), np.uint16(d2),
-                   np.float64(horizon),np.float64(log_horizon), eqn_list)
+                   np.float64(horizon),np.float64(log_horizon), eqn_list, np.uint16(num_eqn))
 
     cl.enqueue_copy(queue, output, output_opencl).wait()
     
@@ -143,7 +140,6 @@ def mandelbrot_image(xmin,xmax,ymin,ymax,width=10,height=10,maxiter=75,cmap='jet
 	save_image(fig,extent,count)
 
 
-image_counter=0
 
 def save_image(fig,extent,count):
 	global image_counter
