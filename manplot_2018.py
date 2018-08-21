@@ -13,7 +13,7 @@ ctx = cl.Context(devices=my_gpu_devices)
 def mandelbrot_gpu(q, maxiter,d1,d2,eqn_list):
 
     global ctx
-    horizon=2.0**15
+    horizon=2.0**15		# For AA, but AA seems to depend on Hausdorff dimension; not working well for random
     log_horizon=np.log(np.log(horizon))/np.log(2)
     queue = cl.CommandQueue(ctx)
     num_eqn = len(eqn_list)
@@ -119,7 +119,13 @@ def mandelbrot_set3(xmin,xmax,ymin,ymax,width,height,maxiter):
 
 
 def mandelbrot_image(xmin,xmax,ymin,ymax,width=10,height=10,maxiter=75,cmap='jet',count=0):
-	l = ['viridis','inferno','plasma','magma','Blues','BuGn','BuPu','GnBu','Greens','Oranges','PuBuGn','PuRd','Purples','RdPu','Reds','YlGn','YlGnBu','YlOrBr','YlOrRd','afmhot','autumn','bone','cool','copper','gist_heat','gray','hot','pink','spring','summer','winter','BrBG','bwr','coolwarm','PiYG','PRGn','PuOr','RdBu','RdGy','RdYlBu','RdYlGn','Spectral','seismic','Dark2','Paired','Pastel1','Pastel2','Set1','Set2','Set3','gist_earth','terrain','ocean','gist_stern','brg','CMRmap','cubehelix','gnuplot','gnuplot2','gist_ncar','nipy_spectral','jet','rainbow','gist_rainbow','hsv','flag','prism']
+	l = ['viridis','inferno','plasma','magma','Blues','BuGn','BuPu','GnBu','Greens','Oranges',
+	     'PuBuGn','PuRd','Purples','RdPu','Reds','YlGn','YlGnBu','YlOrBr','YlOrRd','afmhot',
+	     'autumn','cool','copper','gist_heat','hot','pink','spring','summer','winter','BrBG',
+	     'bwr','coolwarm','PiYG','PRGn','PuOr','RdBu','RdGy','RdYlBu','RdYlGn','Spectral',
+	     'seismic','Dark2','Paired','Pastel1','Pastel2','Set1','Set2','Set3','gist_earth',
+	     'terrain','ocean','gist_stern','brg','CMRmap','cubehelix','gnuplot','gnuplot2',
+	     'gist_ncar','nipy_spectral','jet','rainbow','gist_rainbow','hsv','flag','prism']
 	cmap=l[randint(0,len(l)-1)]
 	print("Cmap: " + cmap)
 	dpi = 100
@@ -148,4 +154,5 @@ def save_image(fig,extent,count):
 	image_counter += 1
 	fig.savefig(filename,bbox_inches=extent)
 
-#mandelbrot_image(-2.0,1.0,-1.5,1.5,cmap='gnuplot2')
+#for i in range(200):
+#	mandelbrot_image(-2.0,1.0,-1.5,1.5,cmap='gnuplot2')
