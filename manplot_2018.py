@@ -27,21 +27,18 @@ def mandelbrot_gpu(q, maxiter,d1,d2,eqn_list):
 		     ushort num_eqn)
     {
         int gid = get_global_id(0);
-        float real = q[gid].x;
-        float imag = q[gid].y;
         cfloat_t c;
         c.real = q[gid].x;
         c.imag = q[gid].y;
         cfloat_t z;
-	    z.real=0;
-	    z.imag=0;
+	z.real=0;
+	z.imag=0;
         output[gid] = 0;
         for(int curiter = 0; curiter < maxiter; curiter++) {
-            float real2 = real*real, imag2 = imag*imag;
             if (z.real*z.real + z.imag*z.imag > 16.0f){
             	double az = sqrt(z.real*z.real+z.imag*z.imag);
-                 output[gid] = curiter;// - log(log(az))/log((float)2)+ log_horizon;
-                 return;
+                output[gid] = curiter;// - log(log(az))/log((float)2)+ log_horizon; // AA - seems dependent on Hausdorff dimension
+                return;
             }
 
 
@@ -50,9 +47,6 @@ def mandelbrot_gpu(q, maxiter,d1,d2,eqn_list):
 					z = cfloat_powr(z,d1);
 					z.real = z.real + q[gid].x;
 					z.imag = z.imag + q[gid].y;
-					//real=z.real;
-					//z.real = z.real*z.real - z.imag*z.imag + q[gid].x;
-					//z.imag = 2*real*z.imag + q[gid].y;
 				} else if (eqn_list[i] == 1) {
 					z=cfloat_powr(z,d2);
 					z.real = z.real + q[gid].x;
