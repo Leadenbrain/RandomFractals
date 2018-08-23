@@ -10,7 +10,7 @@ my_gpu_devices = platform[0].get_devices(device_type=cl.device_type.GPU)
 ctx = cl.Context(devices=my_gpu_devices)
 #ctx = cl.create_some_context(interactive=True)     #uncomment this for interactive context
 
-def mandelbrot_gpu(q, maxiter,d1,d2,eqn_list):
+def fractal_gpu(q, maxiter,d1,d2,eqn_list):
 
     global ctx
     horizon=2.0**15		# For AA, but AA seems to depend on Hausdorff dimension; not working well for random
@@ -21,7 +21,7 @@ def mandelbrot_gpu(q, maxiter,d1,d2,eqn_list):
 
     prg = cl.Program(ctx, """#include <pyopencl-complex.h>
     #pragma OPENCL EXTENSION cl_khr_byte_addressable_store : enable
-    __kernel void mandelbrot(__global float2 *q,
+    __kernel void fractal(__global float2 *q,
                      __global ushort *output, ushort const maxiter,
                      ushort d1, ushort d2, double horizon, double log_horizon, __global ushort *eqn_list,
 		     ushort num_eqn)
@@ -81,20 +81,18 @@ def mandelbrot_gpu(q, maxiter,d1,d2,eqn_list):
     mf = cl.mem_flags
     q_opencl = cl.Buffer(ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=q)
     output_opencl = cl.Buffer(ctx, mf.WRITE_ONLY, output.nbytes)
-    eqn_list = cl.Buffer(ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=eqn_list)
+    eqn_list = cl.Buffer(ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=eqn_list)\
 
-
-    prg.mandelbrot(queue, output.shape, None, q_opencl,
+    prg.fractal(queue, output.shape, None, q_opencl,
                    output_opencl, np.uint16(maxiter), np.uint16(d1), np.uint16(d2),
                    np.float64(horizon),np.float64(log_horizon), eqn_list, np.uint16(num_eqn))
-
     cl.enqueue_copy(queue, output, output_opencl).wait()
     
     return output
 
 
 
-def mandelbrot_set3(xmin,xmax,ymin,ymax,width,height,maxiter):
+def fractal_set3(xmin,xmax,ymin,ymax,width,height,maxiter):
     r1 = np.linspace(xmin, xmax, width, dtype=np.float32)
     r2 = np.linspace(ymin, ymax, height, dtype=np.float32)
     c = r1 + r2[:,None]*1j
@@ -105,14 +103,14 @@ def mandelbrot_set3(xmin,xmax,ymin,ymax,width,height,maxiter):
     num_eqn = randint(2,7)
     eqn_list = np.random.randint(0,7,size=num_eqn)
     print(eqn_list)
-    n3 = mandelbrot_gpu(c,maxiter,d1,d2,eqn_list)
+    n3 = fractal_gpu(c,maxiter,d1,d2,eqn_list)
     n3 = n3.reshape((width,height))
     return (r1,r2,n3.T)
 
 
 
 
-def mandelbrot_image(xmin,xmax,ymin,ymax,width=10,height=10,maxiter=75,cmap='jet',count=0):
+def fractal_image(xmin,xmax,ymin,ymax,width=10,height=10,maxiter=75,cmap='jet',count=0):
 	l = ['viridis','inferno','plasma','magma','Blues','BuGn','BuPu','GnBu','Greens','Oranges',
 	     'PuBuGn','PuRd','Purples','RdPu','Reds','YlGn','YlGnBu','YlOrBr','YlOrRd','afmhot',
 	     'autumn','cool','copper','gist_heat','hot','pink','spring','summer','winter','BrBG',
@@ -125,7 +123,7 @@ def mandelbrot_image(xmin,xmax,ymin,ymax,width=10,height=10,maxiter=75,cmap='jet
 	dpi = 100
 	img_width = dpi * width
 	img_height = dpi * height
-	x,y,z = mandelbrot_set3(xmin,xmax,ymin,ymax,img_width,img_height,maxiter)
+	x,y,z = fractal_set3(xmin,xmax,ymin,ymax,img_width,img_height,maxiter)
 
 	fig, ax = plt.subplots(figsize=(width, height),dpi=dpi)
 	ticks = np.arange(0,6*img_width,3*dpi)
@@ -149,4 +147,4 @@ def save_image(fig,extent,count):
 	fig.savefig(filename,bbox_inches=extent)
 
 #for i in range(200):
-#	mandelbrot_image(-2.0,1.0,-1.5,1.5,cmap='gnuplot2')
+#	fractal_image(-2.0,1.0,-1.5,1.5,cmap='gnuplot2')
