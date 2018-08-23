@@ -99,9 +99,15 @@ def fractal_set3(xmin,xmax,ymin,ymax,width,height,maxiter):
     c = np.ravel(c)
     d1=randint(2,4)
     d2=randint(1,3)
+    while d1 == d2:
+        d2 = randint(1,3)
     print("d1 = " + str(d1) + "     d2 = " + str(d2))
-    num_eqn = randint(2,7)
+    num_eqn = randint(4,10)
     eqn_list = np.random.randint(0,7,size=num_eqn)
+    ran_check = np.full((num_eqn),eqn_list[0])
+    while not (np.count_nonzero(eqn_list - ran_check) > 0):
+        eqn_list = np.random.randint(0,7,size=num_eqn)
+        ran_check = np.full((num_eqn),eqn_list[0])
     print(eqn_list)
     n3 = fractal_gpu(c,maxiter,d1,d2,eqn_list)
     n3 = n3.reshape((width,height))
@@ -111,13 +117,13 @@ def fractal_set3(xmin,xmax,ymin,ymax,width,height,maxiter):
 
 
 def fractal_image(xmin,xmax,ymin,ymax,width=10,height=10,maxiter=75,cmap='jet',count=0):
-	l = ['viridis','inferno','plasma','magma','Blues','BuGn','BuPu','GnBu','Greens','Oranges',
-	     'PuBuGn','PuRd','Purples','RdPu','Reds','YlGn','YlGnBu','YlOrBr','YlOrRd','afmhot',
-	     'autumn','cool','copper','gist_heat','hot','pink','spring','summer','winter','BrBG',
-	     'bwr','coolwarm','PiYG','PRGn','PuOr','RdBu','RdGy','RdYlBu','RdYlGn','Spectral',
-	     'seismic','Dark2','Paired','Pastel1','Pastel2','Set1','Set2','Set3','gist_earth',
+	l = ['viridis','inferno','plasma','magma','PuBuGn','YlGnBu','YlOrRd','afmhot',
+	     'autumn','cool','copper','gist_heat','hot','spring','summer','winter','BrBG',
+	     'bwr','coolwarm','PiYG','PRGn','RdYlBu','RdYlGn','Spectral',
+	     'seismic','Dark2','Paired','Set1','Set2','Set3','gist_earth',
 	     'terrain','ocean','gist_stern','brg','CMRmap','cubehelix','gnuplot','gnuplot2',
-	     'gist_ncar','nipy_spectral','jet','rainbow','gist_rainbow','hsv','flag','prism']
+	     'gist_ncar','nipy_spectral','jet','rainbow','gist_rainbow','hsv','flag','prism',
+         'jet_r','prism_r','hot_r','cool_r','winter_r']
 	cmap=l[randint(0,len(l)-1)]
 	print("Cmap: " + cmap)
 	dpi = 100
