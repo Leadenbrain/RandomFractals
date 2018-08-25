@@ -47,30 +47,37 @@ def fractal_gpu(q, maxiter,d1,d2,eqn_list):
 					z = cfloat_powr(z,d1);
 					z.real = z.real + q[gid].x;
 					z.imag = z.imag + q[gid].y;
+					curiter++;
 				} else if (eqn_list[i] == 1) {
 					z=cfloat_powr(z,d2);
 					z.real = z.real + q[gid].x;
 					z.imag = z.imag + q[gid].y;
+					curiter++;
 				} else if (eqn_list[i] == 2){
 					z.real = sqrt(z.real*z.real);
 					z.imag = sqrt(z.imag*z.imag);
 					z = cfloat_powr(z,2);
 					z.real = z.real + q[gid].x;
 					z.imag = z.imag + q[gid].y;
+					curiter++;
 				} else if (eqn_list[i] == 3) {
 					z = cfloat_exp(z);
 					z.real = z.real + q[gid].x;
 					z.imag = z.imag + q[gid].y;
+					curiter++;
 				} else if (eqn_list[i] == 4) {
 					z = cfloat_cos(z);
 					z.real = z.real + q[gid].x;
 					z.imag = z.imag + q[gid].y;
+					curiter++;
 				} else if (eqn_list[i] == 5) {
 					z.real = z.real*z.real - z.imag*z.imag + q[gid].x;
 					z.imag = 2*z.real*z.imag + q[gid].y;
+					curiter++;
 				} else if (eqn_list[i] == 6) {
 					z.imag = 2*z.real*z.imag + q[gid].y;
 					z.real = z.real*z.real - z.imag*z.imag + q[gid].x;
+					curiter++;
 				}
 			}
             
@@ -111,7 +118,7 @@ def fractal_set3(xmin,xmax,ymin,ymax,width,height,maxiter):
     print(eqn_list)
     n3 = fractal_gpu(c,maxiter,d1,d2,eqn_list)
     n3 = n3.reshape((width,height))
-    return (r1,r2,n3.T)
+    return (r1,r2,n3)
 
 
 
